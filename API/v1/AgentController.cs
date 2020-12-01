@@ -8,7 +8,7 @@ using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Configuration;
 using Hyperledger.Aries.Extensions;
 using Hyperledger.Aries.Storage;
-
+using Hyperledger.Indy.WalletApi;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,20 +47,30 @@ namespace Consent_Aries_VC.API.v1 {
             try
             {
                 // if a wallet exists - then the user is real - so assume he logged in.
-                var wallet = await _walletService.GetWalletAsync(new WalletConfiguration
+                Wallet wallet = null;
+                try
                 {
-                    Id = request.WalletConfigurationId
-                }, new WalletCredentials
-                {
-                    Key = request.WalletKey
-                });
+                    wallet = await _walletService.GetWalletAsync(new WalletConfiguration
+                    {
+                        Id = request.WalletConfigurationId
+                    }, 
+                    new WalletCredentials
+                    {
+                        Key = request.WalletKey
+                    });
+                }
+                catch (Exception) {
+                    
+                }
 
                 if (wallet != null)
                 {
                     // if a provision record is there - agent can be assumed to be logged in
                     var provision = await _provisionService.GetProvisioningAsync(wallet);
                     if (provision != null)
-                        return new OkObjectResult(true);
+                        return new OkObjectResult(new {
+                            result = true
+                        });
                 }
 
                 // if we reach this point - user does not exists and a wallet and provision record is created
@@ -69,7 +79,9 @@ namespace Consent_Aries_VC.API.v1 {
                 agentOptions.EndpointUri = $"http://api-ssi.consentwallets.com/api/v1/agents/{agentOptions.WalletConfiguration.Id}";
                 await _provisionService.ProvisionAgentAsync(agentOptions);
 
-                return new OkObjectResult(true);
+                return new OkObjectResult(new {
+                    result = true
+                });
             }
             catch (Exception)
             {
