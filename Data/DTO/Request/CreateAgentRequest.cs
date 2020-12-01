@@ -9,5 +9,10 @@ namespace Consent_Aries_VC.Data.DTO.Request {
         public string WalletKey { get; set; }
         public string GenesisFilename { get; set; } = Path.GetFullPath("pool_genesis.txn");
         public string PoolName { get; set; } = "TestPool";
+
+        public bool IsInvalid()
+        {
+            return string.IsNullOrEmpty(WalletConfigurationId) && string.IsNullOrEmpty(WalletKey);
+        }
     }
 }

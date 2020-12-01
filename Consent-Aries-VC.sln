@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30309.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Consent-Aries-VC", "Consent-Aries-VC.csproj", "{4D1C2641-DC1B-4F4A-B6C0-7FE6C93C1B3F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D1C2641-DC1B-4F4A-B6C0-7FE6C93C1B3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D1C2641-DC1B-4F4A-B6C0-7FE6C93C1B3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D1C2641-DC1B-4F4A-B6C0-7FE6C93C1B3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D1C2641-DC1B-4F4A-B6C0-7FE6C93C1B3F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50C42B45-4D6D-46F9-A5A7-0F5BF5332DE5}
+	EndGlobalSection
+EndGlobal

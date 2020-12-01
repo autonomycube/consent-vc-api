@@ -50,6 +50,11 @@ namespace Consent_Aries_VC
 
             app.UseCors("AllowAll");
 
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+            });
+
             app.UseAriesFramework<AgentMiddleware>();
 
             app.UseSwagger();

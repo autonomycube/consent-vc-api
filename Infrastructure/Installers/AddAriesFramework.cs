@@ -17,12 +17,10 @@ namespace Consent_Aries_VC.Infrastructure.Installers {
             {
                 builder.RegisterAgent<ConsentAgent>(c =>
                 {
-                    c.AgentName = Environment.GetEnvironmentVariable("AGENT_NAME") ?? NameGenerator.GetRandomName();
-                    //c.EndpointUri = "http://5e751170ce64.ngrok.io/";
-                    c.EndpointUri = "http://localhost:5000/";
-                    //c.EndpointUri = Environment.GetEnvironmentVariable("ENDPOINT_HOST") ?? Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
-                    c.WalletConfiguration = new WalletConfiguration { Id = "ClaimerWallet" };
-                    c.WalletCredentials = new WalletCredentials { Key = "MyWalletKey" };
+                    c.AgentName = "Consent";
+                    c.EndpointUri = "http://api-ssi.consentwallets.com/";
+                    c.WalletConfiguration = new WalletConfiguration { Id = "consent" };
+                    c.WalletCredentials = new WalletCredentials { Key = "consentindia123$" };
                     c.GenesisFilename = Path.GetFullPath("pool_genesis.txn");
                     c.PoolName = "TestPool";
                 });

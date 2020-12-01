@@ -7,6 +7,8 @@ using Consent_Aries_VC.Services.Abstract;
 using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Configuration;
 using Hyperledger.Aries.Extensions;
+using Hyperledger.Aries.Storage;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +18,7 @@ namespace Consent_Aries_VC.API.v1 {
         #region Private Variables
         private readonly IAgentService _agentService;
         private readonly IProvisioningService _provisionService;
+        private readonly IWalletService _walletService;
         private readonly IMapper _mapper;
         #endregion
 
@@ -23,20 +26,55 @@ namespace Consent_Aries_VC.API.v1 {
         public AgentController(
             IAgentService agentService, 
             IProvisioningService provisionService,
+            IWalletService walletService,
             IMapper mapper
         ) {
             _agentService = agentService;
             _provisionService = provisionService;
+            _walletService = walletService;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
         #endregion
 
-        [HttpPost]
-        public async Task CreateAgent([FromBody] CreateAgentRequest request)
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] CreateAgentRequest request)
         {
-            var agentOptions = _mapper.Map<AgentOptions>(request);
-            agentOptions.EndpointUri = $"http://localhost:5000/api/v1/agents/{agentOptions.WalletConfiguration.Id}";
-            await _provisionService.ProvisionAgentAsync(agentOptions);
+            if (request.IsInvalid())
+            {
+                return new BadRequestObjectResult("Invalid request");
+            }
+
+            try
+            {
+                // if a wallet exists - then the user is real - so assume he logged in.
+                var wallet = await _walletService.GetWalletAsync(new WalletConfiguration
+                {
+                    Id = request.WalletConfigurationId
+                }, new WalletCredentials
+                {
+                    Key = request.WalletKey
+                });
+
+                if (wallet != null)
+                {
+                    // if a provision record is there - agent can be assumed to be logged in
+                    var provision = await _provisionService.GetProvisioningAsync(wallet);
+                    if (provision != null)
+                        return new OkObjectResult(true);
+                }
+
+                // if we reach this point - user does not exists and a wallet and provision record is created
+                // for him and will be logged in.
+                var agentOptions = _mapper.Map<AgentOptions>(request);
+                agentOptions.EndpointUri = $"http://api-ssi.consentwallets.com/api/v1/agents/{agentOptions.WalletConfiguration.Id}";
+                await _provisionService.ProvisionAgentAsync(agentOptions);
+
+                return new OkObjectResult(true);
+            }
+            catch (Exception)
+            {
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError); 
+            }
         }
 
         [HttpPost("{name}")]
