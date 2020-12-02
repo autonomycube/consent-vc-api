@@ -52,7 +52,7 @@ namespace Consent_Aries_VC.API.v1 {
                 CredentialDefinitionId = offerRequest.CredentialDefinitionId,
                 IssuerDid = issuer.IssuerDid,
                 CredentialAttributeValues = values
-            });
+            }, offerRequest.ConnectionId);
             Console.WriteLine(offer);
             
             await _messageService.SendAsync(context.Wallet, offer, connection);

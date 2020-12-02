@@ -77,6 +77,8 @@ namespace Consent_Aries_VC.API.v1 {
                 // for him and will be logged in.
                 var agentOptions = _mapper.Map<AgentOptions>(request);
                 agentOptions.EndpointUri = $"http://api-ssi.consentwallets.com/api/v1/agents/{agentOptions.WalletConfiguration.Id}";
+                agentOptions.AutoRespondCredentialOffer = true;
+                agentOptions.AutoRespondCredentialRequest = true;
                 await _provisionService.ProvisionAgentAsync(agentOptions);
 
                 return new OkObjectResult(new {

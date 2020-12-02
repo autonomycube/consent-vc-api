@@ -1,9 +1,7 @@
-using System;
 using System.IO;
 using Consent_Aries_VC.Contracts;
 using Consent_Aries_VC.Infrastructure.Protocols.BasicMessage;
 using Consent_Aries_VC.Infrastructure.Protocols.TrustPing;
-using Consent_Aries_VC.Infrastructure.Utils;
 using Hyperledger.Aries.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +21,8 @@ namespace Consent_Aries_VC.Infrastructure.Installers {
                     c.WalletCredentials = new WalletCredentials { Key = "consentindia123$" };
                     c.GenesisFilename = Path.GetFullPath("pool_genesis.txn");
                     c.PoolName = "TestPool";
+                    c.AutoRespondCredentialOffer = true;
+                    c.AutoRespondCredentialRequest = true;
                 });
             });
 

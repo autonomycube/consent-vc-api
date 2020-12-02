@@ -1,7 +1,6 @@
 using System;
 using Consent_Aries_VC.Infrastructure.Protocols.BasicMessage;
 using Consent_Aries_VC.Infrastructure.Protocols.TrustPing;
-using Consent_Aries_VC.Services;
 using Hyperledger.Aries.Agents;
 
 namespace Consent_Aries_VC.Infrastructure.Installers {
