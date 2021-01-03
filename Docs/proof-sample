@@ -1,0 +1,10 @@
+issuer->holder connId: 519f729c-c5ca-462c-8e87-582dbdb1554d
+holder->issuer connId: 27a06ccf-3de7-42d7-8658-896aecc42218
+
+verifier->holder connId: 7380cfc5-a1ed-4ce7-ac70-b1431981ea15
+holder->verifier connId: 6684c8f8-3f23-4625-b5a7-0ce1e488abc2
+
+schemaId: EARpnyeZTu9CWAp636yZmB:2:dob:1.0
+credDefId: EARpnyeZTu9CWAp636yZmB:3:CL:25:latest
+
+credentialId: 23601969-3f8d-46e8-b2a1-588fc57bb6b8

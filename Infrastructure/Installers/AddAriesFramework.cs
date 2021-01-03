@@ -16,7 +16,8 @@ namespace Consent_Aries_VC.Infrastructure.Installers {
                 builder.RegisterAgent<ConsentAgent>(c =>
                 {
                     c.AgentName = "Consent";
-                    c.EndpointUri = "http://api-ssi.consentwallets.com/";
+                    // c.EndpointUri = "http://api-ssi.consentwallets.com/";
+                    c.EndpointUri = "http://localhost:7000/";
                     c.WalletConfiguration = new WalletConfiguration { Id = "consent" };
                     c.WalletCredentials = new WalletCredentials { Key = "consentindia123$" };
                     c.GenesisFilename = Path.GetFullPath("pool_genesis.txn");

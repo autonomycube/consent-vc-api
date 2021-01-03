@@ -76,7 +76,8 @@ namespace Consent_Aries_VC.API.v1 {
                 // if we reach this point - user does not exists and a wallet and provision record is created
                 // for him and will be logged in.
                 var agentOptions = _mapper.Map<AgentOptions>(request);
-                agentOptions.EndpointUri = $"http://api-ssi.consentwallets.com/api/v1/agents/{agentOptions.WalletConfiguration.Id}";
+                // agentOptions.EndpointUri = $"http://api-ssi.consentwallets.com/api/v1/agents/{agentOptions.WalletConfiguration.Id}";
+                agentOptions.EndpointUri = $"http://localhost:7000/api/v1/agents/{agentOptions.WalletConfiguration.Id}";
                 agentOptions.AutoRespondCredentialOffer = true;
                 agentOptions.AutoRespondCredentialRequest = true;
                 await _provisionService.ProvisionAgentAsync(agentOptions);

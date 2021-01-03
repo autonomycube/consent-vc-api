@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoWrapper.Wrappers;
+using Consent_Aries_VC.Data.DTO.Generic;
 using Consent_Aries_VC.Services.Abstract;
 using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Configuration;
 using Hyperledger.Aries.Features.IssueCredential;
 using Hyperledger.Aries.Models.Records;
+using Hyperledger.Indy.WalletApi;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Consent_Aries_VC.API.v1 {
@@ -27,27 +30,31 @@ namespace Consent_Aries_VC.API.v1 {
                 }
         #endregion
 
-        [HttpPost("{name}/{id}")]
-        public async Task<object> Create([FromRoute] string name, [FromRoute] string id) {
-            Console.WriteLine(id);
-            var context = await _agentService.GetAgentContext(name, name);
-            var issuer = await _provisionService.GetProvisioningAsync(context.Wallet);
-            var credDefId = await _schemaService.CreateCredentialDefinitionAsync(context, new CredentialDefinitionConfiguration {
-                SchemaId = id,
-                Tag = "default",
-                EnableRevocation = false,
-                RevocationRegistrySize = 0,
-                RevocationRegistryBaseUri = string.Empty,
-                RevocationRegistryAutoScale = false,
-                IssuerDid = issuer.IssuerDid
-            });
-            return new { credDefId };
-        }
-
         [HttpGet("{name}")]
-        public async Task<List<DefinitionRecord>> Get([FromRoute] string name) {
-            var context = await _agentService.GetAgentContext(name, name);
-            return await _schemaService.ListCredentialDefinitionsAsync(context.Wallet);
+        public async Task<ApiResponse> Get([FromRoute] string name) 
+        {
+            try
+            {
+                var context = await _agentService.GetAgentContext(name, name);
+                var credDefs = await _schemaService.ListCredentialDefinitionsAsync(context.Wallet);
+                return new ApiResponse("credential definitions retrieved" ,credDefs, 200);
+            }
+            catch (WalletNotFoundException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
         }
     }
 }

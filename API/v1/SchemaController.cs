@@ -1,21 +1,22 @@
-using System.Collections.Generic;
+using System;
 using System.Threading.Tasks;
+using AutoWrapper.Wrappers;
 using Consent_Aries_VC.Data.DTO.Request;
+using Consent_Aries_VC.Infrastructure.Utils;
 using Consent_Aries_VC.Services.Abstract;
-// using Consent_Aries_VC.Data.DTO.Request;
-using Hyperledger.Aries.Agents;
-using Hyperledger.Aries.AspNetCore.Features.Schemas;
 using Hyperledger.Aries.Configuration;
 using Hyperledger.Aries.Extensions;
 using Hyperledger.Aries.Features.IssueCredential;
-using Hyperledger.Aries.Models.Records;
 using Hyperledger.Indy.DidApi;
 using Hyperledger.Indy.LedgerApi;
+using Hyperledger.Indy.WalletApi;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Consent_Aries_VC.API.v1 {
+namespace Consent_Aries_VC.API.v1 
+{
     [Route("/api/v1/schemas")]
-    public class SchemaController : ControllerBase {
+    public class SchemaController : ControllerBase 
+    {
         #region Private Variables
         private readonly ISchemaService _schemaService;
         private readonly IAgentService _agentService;
@@ -33,30 +34,74 @@ namespace Consent_Aries_VC.API.v1 {
         #endregion
         
         [HttpPost]
-        public async Task<object> Create([FromBody] CreateConsentSchemaRequest request) {
-            var context = await _agentService.GetAgentContext(request.AgentName, request.AgentName);
-            var issuer = await _provisionService.GetProvisioningAsync(context.Wallet);
-            var Trustee = await Did.CreateAndStoreMyDidAsync(context.Wallet,
-                new { seed = "000000000000000000000000Steward1" }.ToJson());
+        public async Task<ApiResponse> Create([FromBody] CreateConsentSchemaRequest request) 
+        {
+            var agentName = ConsentUtils.agentName(HttpContext);
             
-            await Ledger.SignAndSubmitRequestAsync(await context.Pool, context.Wallet, Trustee.Did,
-            await Ledger.BuildNymRequestAsync(Trustee.Did, issuer.IssuerDid, issuer.IssuerVerkey, null, "ENDORSER"));
-            
-            var schemaId = await _schemaService.CreateSchemaAsync(
-                    context: context,
-                    issuerDid: issuer.IssuerDid,
-                    name: request.Name,
-                    version: request.Version,
-                    attributeNames: request.AttributeNames.ToArray());
+            try
+            {
+                var context = await _agentService.GetAgentContext(agentName, agentName);
+                var issuer = await _provisionService.GetProvisioningAsync(context.Wallet);
+                var Trustee = await Did.CreateAndStoreMyDidAsync(context.Wallet,
+                    new { seed = "000000000000000000000000Steward1" }.ToJson());
+                
+                await Ledger.SignAndSubmitRequestAsync(await context.Pool, context.Wallet, Trustee.Did,
+                await Ledger.BuildNymRequestAsync(Trustee.Did, issuer.IssuerDid, issuer.IssuerVerkey, null, "ENDORSER"));
+                
+                var schemaId = await _schemaService.CreateSchemaAsync(
+                        context: context,
+                        issuerDid: issuer.IssuerDid,
+                        name: request.Name,
+                        version: request.Version,
+                        attributeNames: request.AttributeNames.ToArray());
 
-            return new { schemaId };
+                var credDefId = await _schemaService.CreateCredentialDefinitionAsync(context, new CredentialDefinitionConfiguration {
+                    SchemaId = schemaId,
+                    Tag = string.IsNullOrEmpty(request.Tag) ? "latest" : request.Tag,
+                    EnableRevocation = request.EnableRevocation,
+                    RevocationRegistrySize = 0,
+                    RevocationRegistryBaseUri = string.Empty,
+                    RevocationRegistryAutoScale = false,
+                    IssuerDid = issuer.IssuerDid
+                });
+
+                return new ApiResponse("Schema created successfully", new { schemaId, credDefId }, 200);
+            }
+            catch (WalletNotFoundException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
         }
 
         [HttpGet("{name}")]
-        public async Task<List<SchemaRecord>> Get([FromRoute] string name) {
-            var context = await _agentService.GetAgentContext(name, name);
-            var schemas = await _schemaService.ListSchemasAsync(context.Wallet);
-            return schemas;
+        public async Task<ApiResponse> Get([FromRoute] string name) 
+        {
+            try
+            {
+                var context = await _agentService.GetAgentContext(name, name);
+                var schemas = await _schemaService.ListSchemasAsync(context.Wallet);
+                return new ApiResponse("Schemas retrieved", schemas, 200);
+            }
+            catch (WalletNotFoundException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
         }
     }
 }

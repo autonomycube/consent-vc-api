@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
+    <PackageReference Include="AutoWrapper.Core" Version="4.3.1" />
     <PackageReference Include="Hyperledger.Aries" Version="1.4.0" />
     <PackageReference Include="Hyperledger.Aries.AspNetCore" Version="1.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />

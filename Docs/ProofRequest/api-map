@@ -1,0 +1,7 @@
+MAIN FLOW:
+---------
+
+1) (RequestPresentationMessage, ProofRecord) CreateRequestAsync(IAgentContext, ProofRequest, connectionId) - verifier
+2) ProofRecord CreatePresentationAsync(IAgentContext, RequestPresentationMessage, RequestCredentials) - Holder if accepted Request
+2) void RejectProofRequestAsync(IAgentContext, ProofRequestId) - Holder if rejects Request
+3) bool VerifyProofAsync(IAgentContext, ProofRecordId)

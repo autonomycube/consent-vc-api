@@ -1,4 +1,5 @@
 using AutoMapper;
+using AutoWrapper;
 using Consent_Aries_VC.Infrastructure.Configs;
 using Consent_Aries_VC.Infrastructure.Extensions;
 using Consent_Aries_VC.Infrastructure.Middlewares;
@@ -51,12 +52,18 @@ namespace Consent_Aries_VC
             app.UseAriesFramework<AgentMiddleware>();
 
             app.UseSwagger();
-            app.UseSwaggerUI(x => x.SwaggerEndpoint(
-                "/swagger/v1/swagger.json",
-                "Consent Aries VC API v1"
-            ));
+            app.UseSwaggerUI(x => {
+                x.SwaggerEndpoint(
+                    "/swagger/v1/swagger.json",
+                    "Consent Aries VC API v1"
+                    );
+                    x.RoutePrefix = string.Empty;
+                }
+            );
 
             app.UseAuthorization();
+
+            app.UseApiResponseAndExceptionWrapper();
 
             app.UseEndpoints(endpoints =>
             {

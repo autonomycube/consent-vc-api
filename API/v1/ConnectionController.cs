@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoWrapper.Wrappers;
+using Consent_Aries_VC.Data.DTO.Generic;
 using Consent_Aries_VC.Data.DTO.Request;
+using Consent_Aries_VC.Infrastructure.Utils;
 using Consent_Aries_VC.Services.Abstract;
 using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Configuration;
 using Hyperledger.Aries.Extensions;
 using Hyperledger.Aries.Features.DidExchange;
 using Hyperledger.Aries.Utils;
+using Hyperledger.Indy.WalletApi;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Consent_Aries_VC.API.v1 {
@@ -37,45 +41,125 @@ namespace Consent_Aries_VC.API.v1 {
         #endregion
 
         [HttpPost("invite")]
-        public async Task<object> Invite([FromBody] CreateConnectionInvitationRequest request) {
+        public async Task<ApiResponse> Invite([FromBody] CreateConnectionInvitationRequest request) 
+        {
             //var context = await _agentContextProvider.GetContextAsync();
-            var context = await _agentService.GetAgentContext(request.WalletConfigurationId, request.WalletKey);
+            try
+            {
+                var agentName = ConsentUtils.agentName(HttpContext);
+                var context = await _agentService.GetAgentContext(agentName, agentName);
 
-            (var connectionInvitationMessage, var connectionRecord) = 
-            await _connectionService.CreateInvitationAsync(context, new InviteConfiguration {
-                AutoAcceptConnection = true,
-                MyAlias = request.Alias
-            });
+                (var connectionInvitationMessage, var connectionRecord) = 
+                await _connectionService.CreateInvitationAsync(context, new InviteConfiguration {
+                    AutoAcceptConnection = true,
+                    MyAlias = request.Alias
+                });
 
-            return new {
-                qrUrl = $"{(await _provisionService.GetProvisioningAsync(context.Wallet)).Endpoint.Uri}?c_i={connectionInvitationMessage.ToJson().ToBase64()}"
-            };
+                var qrUrl = $"{(await _provisionService.GetProvisioningAsync(context.Wallet)).Endpoint.Uri}?c_i={connectionInvitationMessage.ToJson().ToBase64()}";
+
+                return new ApiResponse("Connection invitation sent", qrUrl, 200);
+            }
+            catch (WalletNotFoundException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
         }
 
         [HttpPost("accept")]
-        public async Task AcceptInvitation([FromBody] AcceptConnectionRequest connectionReqeust) {
-            //var context = await _agentContextProvider.GetContextAsync();
-            var context = await _agentService.GetAgentContext(connectionReqeust.WalletConfigurationId, connectionReqeust.WalletKey);
-
-            var invite = MessageUtils.DecodeMessageFromUrlFormat<ConnectionInvitationMessage>(connectionReqeust.InvitationDetails);
-            var (request, record) = await _connectionService.CreateRequestAsync(context, invite);
-            await _messageService.SendAsync(context.Wallet, request, record);
+        public async Task<ApiResponse> AcceptInvitation([FromBody] AcceptConnectionRequest connectionReqeust) 
+        {
+            try
+            {
+                var agentName = ConsentUtils.agentName(HttpContext);
+                var context = await _agentService.GetAgentContext(agentName, agentName);
+                var invite = MessageUtils.DecodeMessageFromUrlFormat<ConnectionInvitationMessage>(connectionReqeust.InvitationDetails);
+                var (request, record) = await _connectionService.CreateRequestAsync(context, invite);
+                await _messageService.SendAsync(context.Wallet, request, record);
+                return new ApiResponse("Invitation accepted", true, 200);
+            }
+            catch (WalletNotFoundException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
         }
 
         [HttpGet]
-        public async Task<List<ConnectionRecord>> Get() {
-            var context = await _agentContextProvider.GetContextAsync();
-
-            var invitedConnections = await _connectionService.ListAsync(context);
-            return invitedConnections;
+        public async Task<ApiResponse> Get() 
+        {
+            try
+            {
+                var context = await _agentContextProvider.GetContextAsync();
+                var invitedConnections = await _connectionService.ListAsync(context);
+                return new ApiResponse("Connections retrieved", invitedConnections, 200);
+            }
+            catch (WalletNotFoundException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
         }
 
         [HttpGet("{name}")]
-        public async Task<List<ConnectionRecord>> GetByName([FromRoute] string name) {
-            var context = await _agentService.GetAgentContext(name, name);
+        public async Task<ApiResponse> GetByName([FromRoute] string name) 
+        {
+            try
+            {
+                var context = await _agentService.GetAgentContext(name, name);
 
-            var connections = await _connectionService.ListAsync(context);
-            return connections;
+                var connections = await _connectionService.ListAsync(context);
+                return new ApiResponse("connections retrieved", connections, 200);
+            }
+            catch (WalletNotFoundException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
         }
     }
 }

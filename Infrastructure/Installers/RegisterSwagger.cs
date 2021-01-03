@@ -16,6 +16,7 @@ namespace Consent_Aries_VC.Infrastructure.Installers {
                     Version = "v1",
                 });
                 options.DocumentFilter<SwaggerAriesApiHideFilter>();
+                options.OperationFilter<AddHeadersInSwaggerFilter>();
             });
         }
     }
