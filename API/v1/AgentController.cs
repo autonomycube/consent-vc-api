@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoWrapper.Wrappers;
 using Consent_Aries_VC.Data.DTO.Request;
 using Consent_Aries_VC.Services.Abstract;
 using Hyperledger.Aries.Agents;
@@ -37,11 +38,11 @@ namespace Consent_Aries_VC.API.v1 {
         #endregion
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] CreateAgentRequest request)
+        public async Task<ApiResponse> Login([FromBody] CreateAgentRequest request)
         {
             if (request.IsInvalid())
             {
-                return new BadRequestObjectResult("Invalid request");
+                throw new ApiException("Invalid request", 400);
             }
 
             try
@@ -68,7 +69,7 @@ namespace Consent_Aries_VC.API.v1 {
                     // if a provision record is there - agent can be assumed to be logged in
                     var provision = await _provisionService.GetProvisioningAsync(wallet);
                     if (provision != null)
-                        return new OkObjectResult(new {
+                        return new ApiResponse(new {
                             result = true
                         });
                 }
@@ -82,13 +83,13 @@ namespace Consent_Aries_VC.API.v1 {
                 agentOptions.AutoRespondCredentialRequest = true;
                 await _provisionService.ProvisionAgentAsync(agentOptions);
 
-                return new OkObjectResult(new {
+                return new ApiResponse(new {
                     result = true
                 });
             }
             catch (Exception)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError); 
+                throw new ApiException(StatusCodes.Status500InternalServerError); 
             }
         }
 

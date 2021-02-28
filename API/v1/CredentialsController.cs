@@ -112,5 +112,33 @@ namespace Consent_Aries_VC.API.v1
                 throw new ApiException(ex);
             }
         }
+
+        [HttpPut("{credId}")]
+        public async Task<ApiResponse> RevokeCredential([FromRoute] string credId) 
+        {
+            try
+            {
+                var agentName = ConsentUtils.agentName(HttpContext);
+                var context = await _agentService.GetAgentContext(agentName, agentName);
+                await _credentialService.RevokeCredentialAsync(context, credId);   
+                return new ApiResponse("Revocation successful", true, 200);
+            }
+            catch (WalletNotFoundException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ApiException(ex.Message, 400);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex);
+            }
+        }
     }
 }

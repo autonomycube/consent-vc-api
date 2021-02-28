@@ -59,9 +59,9 @@ namespace Consent_Aries_VC.API.v1
                     SchemaId = schemaId,
                     Tag = string.IsNullOrEmpty(request.Tag) ? "latest" : request.Tag,
                     EnableRevocation = request.EnableRevocation,
-                    RevocationRegistrySize = 0,
-                    RevocationRegistryBaseUri = string.Empty,
-                    RevocationRegistryAutoScale = false,
+                    RevocationRegistrySize = 1,
+                    // RevocationRegistryBaseUri = string.Empty,
+                    RevocationRegistryAutoScale = request.EnableRevocation,
                     IssuerDid = issuer.IssuerDid
                 });
 
